@@ -1,0 +1,15 @@
+{
+  "name": "meuporg-packet",
+  "version": "0.0.1",
+  "description": "A codec module for meuporg network packets.",
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "directories": {
+    "src": "src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com:hackoryu/meuporg-packet.git"
+  }
+}
