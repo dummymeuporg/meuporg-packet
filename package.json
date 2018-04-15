@@ -8,6 +8,7 @@
   "directories": {
     "src": "src"
   },
+  "main": "src/packet.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com:hackoryu/meuporg-packet.git"

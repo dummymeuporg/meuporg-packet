@@ -1,6 +1,6 @@
 const assert = require('assert');
 const Parser = require('binary-parser').Parser;
-const packet = require('../src/packet.js');
+const packet = require('meuporg-packet');
 
 describe('DecodedPacket', () => {
   it('should encode properly.', () => {
