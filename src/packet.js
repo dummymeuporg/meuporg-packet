@@ -1,3 +1,4 @@
+const Parser = require('binary-parser').Parser;
 const zeroBuffer = new Buffer('00', 'hex');
 
 class DecodedPacket {
@@ -8,27 +9,19 @@ class DecodedPacket {
   }
 
   _encode() {
+    const packetParts = [];
+    let packetSize = 0;
     this._params.forEach((param) => {
-      const packetParts = [];
-      const packetSize = 0;
-
       let buffer;
-      if(typeof param === "string") {
-        buffer = new buffer(param, 'utf8');
-        buffer = Buffer.concat([buffer, zeroBuffer], buffer.length + 1);
-      } else if (typeof param === "number") {
-        buffer = new Buffer(2); // 2 = sizeof uint16
-        buffer.writeUInt16LE(param, 0);
-      } else {
-        console.log("Warning: Unknown data type in packet encoder.");
-      }
+      buffer = new Buffer(param, 'utf8');
+      buffer = Buffer.concat([buffer, zeroBuffer], buffer.length + 1);
       packetSize += buffer.length;
       packetParts.push(buffer);
     });
 
     const dataBuffer = Buffer.concat(packetParts, packetSize);
     const size = new Buffer(2);
-    size.writeUInt16(dataBuffer.length + 1, 0);
+    size.writeUInt16LE(dataBuffer.length, 0);
 
     this.encodedBuffer = Buffer.concat([size, dataBuffer], size.length + dataBuffer.length);
   }
@@ -37,21 +30,27 @@ class DecodedPacket {
 class EncodedPacket {
   constructor(buffer) {
     this._buffer = buffer;
-    this._decodedParams = [];
+    this.decodedParams = [];
     this._decode();
   }
 
   _decode() {
-    const idx = 0;
-    let packetSize;
-    let extractedPacket;
 
-    while(idx < this.buffer.length) {
-      packetSize = data.readUInt16(idx);
-      extractedPacket = new Buffer(packetSize);
-      self._buffer.copy(extractedPacket, 0, idx, idx + packetSize);
-      this._decodedParams.push(extractedPacket);
-      idx += packetSize;
+    // Parsers
+    const packetStartParser = new Parser()
+      .uint16le('size')
+      .string('command', {zeroTerminated: true});
+    const zstringParser = new Parser().string('str', {zeroTerminated: true});
+
+    let params = packetStartParser.parse(this._buffer);
+    let index = 2 + params.command.length + 1; // +2 for the size, +1 for the \0
+    const packetSize = params.size;
+
+    this.decodedParams.push(params.command);
+    while(index < this._buffer.length) {
+      params = zstringParser.parse(this._buffer.slice(index), {zeroTerminated: true});
+      this.decodedParams.push(params.str);
+      index += params.str.length + 1;
     }
   }
 }

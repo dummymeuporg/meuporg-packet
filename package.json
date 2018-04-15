@@ -11,5 +11,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com:hackoryu/meuporg-packet.git"
+  },
+  "dependencies": {
+    "mocha": "*",
+    "binary-parser": "*"
   }
 }
